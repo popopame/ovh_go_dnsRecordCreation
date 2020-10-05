@@ -25,7 +25,7 @@ func main() {
 	}
 
 	//Fetching all the needed info
-	recordType := "A"
+	recordType := "A" //recordtype is fixed because for now, I mainly work with IPV4, but you can make the variable set by environment variable by setting the value to os.getenv("OVH_RECORDTYPE")
 	domain := os.Getenv("OVH_DOMAIN")
 	subDomain := os.Getenv("OVH_SUBDOMAIN")
 	endpoint := os.Getenv("OVH_IP_ENDPOINT")
