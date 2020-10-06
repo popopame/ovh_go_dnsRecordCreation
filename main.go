@@ -25,11 +25,7 @@ func main() {
 	}
 
 	//Fetching all the needed info
-	recordType := "A" //recordtype is fixed because for now, I mainly work with IPV4, but you can make the variable set by environment variable by setting the value to os.getenv("OVH_RECORDTYPE")
-	domain := os.Getenv("OVH_DOMAIN")
-	subDomain := os.Getenv("OVH_SUBDOMAIN")
-	endpoint := os.Getenv("OVH_IP_ENDPOINT")
-	actionRecord := os.Getenv("OVH_ACTION")
+	recordType, domain, subDomain, endpoint, actionRecord := setVariables()
 
 	fmt.Printf("Going to %s the %s subdomain for %s domain pointing to %s \n",actionRecord,subDomain,domain,endpoint)
 
@@ -51,6 +47,39 @@ func main() {
 	
 	}
 
+}
+
+//setVariable will fetch the environment variables containing the needed value for the script, if it fail to fetch one variable, it return an error and exit
+func setVariables() (string, string, string, string, string){
+	recordType := os.Getenv("OVH_RECORD_TYPE") //we test if the type of the record is set, if not, we fallback to A
+	if len(recordType) == 0 {
+		recordType = "A"
+		fmt.Println("variables OVH_RECORD_TYPE not set, fallbacking to A (IPV4 type)")
+	}
+
+
+	domain := os.Getenv("OVH_DOMAIN")
+	if len(domain) == 0 {
+		fmt.Fprintf(os.Stderr,"Variable OVH_DOMAIN NOT SET, Please verify your environment variables")
+		os.Exit(1)
+	}
+	subDomain := os.Getenv("OVH_SUBDOMAIN")
+	if len(subDomain) == 0 {
+		fmt.Fprintf(os.Stderr,"Variable OVH_SUBDOMAIN NOT SET, Please verify your environment variables")
+		os.Exit(1)
+	}
+	endpoint := os.Getenv("OVH_IP_ENDPOINT")
+	if len(endpoint) == 0 {
+		fmt.Fprintf(os.Stderr,"Variable OVH_IP_ENDPOINT NOT SET, Please verify your environment variables")
+		os.Exit(1)
+	}
+	actionRecord := os.Getenv("OVH_ACTION")
+	if len(actionRecord) == 0 {
+		fmt.Fprintf(os.Stderr,"Variable OVH_ACTION NOT SET, Please verify your environment variables")
+		os.Exit(1)
+	}
+
+	return recordType,domain,subDomain,endpoint,actionRecord
 }
 
 //createARecord take as argument the client , zonename,diledtype,subdomain and target, and post a GET request on the url, and write the response to the record struc
