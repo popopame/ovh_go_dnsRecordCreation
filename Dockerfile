@@ -23,7 +23,7 @@ WORKDIR /output
 RUN cp /build/script .
 
 #Build from scratch as we only need the binary
-FROM scratch
+FROM alpine
 
 COPY --from=builder /build/script /
 

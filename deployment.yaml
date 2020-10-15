@@ -1,0 +1,45 @@
+# Source: geowallet-webapp/templates/geowallet-webapp-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geowallet-test-dns
+  namespace: geowallet-test
+  labels:
+    helm.sh/chart: geowallet-webapp-0.1.0
+    app.kubernetes.io/name: geowallet-webapp
+    app.kubernetes.io/instance: geowallet-test
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/env: dev
+    app.kubernetes.io/tier: backend
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/stage: dev
+    app.kubernetes.io/webapp-subdomain-name: gotest
+    app.kubernetes.io/webapp-domain-name: geowallet.io
+    app.kubernetes.io/package: webapp-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: geowallet-webapp
+      app.kubernetes.io/instance: geowallet-test
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: geowallet-webapp
+        app.kubernetes.io/instance: geowallet-test
+    spec:
+      containers:
+      - name: geowallet-test-dns
+        image: "popopame/ovh_dns_record_creation:latest"
+        command: ["sleep","3600"]
+        volumeMounts:
+        - name: configuration-file
+          mountPath: "/root"
+      volumes:
+      - name: configuration-file
+        secret:
+          secretName: geowallet-test-geowallet-webapp-preinstall-job-configuration-file
+          items:
+          - key: configuration-file
+            path: .ovh.conf
+

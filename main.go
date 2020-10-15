@@ -40,10 +40,11 @@ func main() {
 
 
 	case "DELETE":
-		err = deleteARecord(client,domain,recordType,endpoint)
+		err = deleteARecord(client,domain,recordType,subDomain)
 		if err != nil {
 			fmt.Printf("Error: %s",err)
 		}
+		fmt.Printf("Succes !")
 	
 	}
 
@@ -60,22 +61,22 @@ func setVariables() (string, string, string, string, string){
 
 	domain := os.Getenv("OVH_DOMAIN")
 	if len(domain) == 0 {
-		fmt.Fprintf(os.Stderr,"Variable OVH_DOMAIN NOT SET, Please verify your environment variables")
+		fmt.Fprintf(os.Stderr,"Variable OVH_DOMAIN NOT SET, Please verify your environment variables\n")
 		os.Exit(1)
 	}
 	subDomain := os.Getenv("OVH_SUBDOMAIN")
 	if len(subDomain) == 0 {
-		fmt.Fprintf(os.Stderr,"Variable OVH_SUBDOMAIN NOT SET, Please verify your environment variables")
+		fmt.Fprintf(os.Stderr,"Variable OVH_SUBDOMAIN NOT SET, Please verify your environment variables\n")
 		os.Exit(1)
 	}
 	endpoint := os.Getenv("OVH_IP_ENDPOINT")
 	if len(endpoint) == 0 {
-		fmt.Fprintf(os.Stderr,"Variable OVH_IP_ENDPOINT NOT SET, Please verify your environment variables")
+		fmt.Fprintf(os.Stderr,"Variable OVH_IP_ENDPOINT NOT SET, Please verify your environment variables\n")
 		os.Exit(1)
 	}
 	actionRecord := os.Getenv("OVH_ACTION")
 	if len(actionRecord) == 0 {
-		fmt.Fprintf(os.Stderr,"Variable OVH_ACTION NOT SET, Please verify your environment variables")
+		fmt.Fprintf(os.Stderr,"Variable OVH_ACTION NOT SET, Please verify your environment variables\n")
 		os.Exit(1)
 	}
 
@@ -111,7 +112,7 @@ func getRecordId(ovhClient *ovh.Client, zoneName, fieldType, subdomain string) (
 	if err != nil {
 		return nil , fmt.Errorf("OVH API Call Failed: GET %s \n Error: %v", url, err)
 	}
-
+	fmt.Println(url)
 	return ids, err
 }
 
@@ -119,7 +120,11 @@ func getRecordId(ovhClient *ovh.Client, zoneName, fieldType, subdomain string) (
 //deleteARecord takes as argument the client, zoneName, fieldType and subdomain, and susing these arg it will first querry the id using the getRecordId func and make a post request with the id
 func deleteARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain string) error {
 	
-	ids , _ := getRecordId(ovhClient, zoneName, fieldType, subdomain)
+	ids , err := getRecordId(ovhClient, zoneName, fieldType, subdomain)
+	if err != nil {
+		return fmt.Errorf("Can't retrieve record: \nError: %v\n", err)
+	}
+
 	for _, id := range ids {
 		url := "/domain/zone/" + zoneName + "/record/" + strconv.Itoa(id)
 
@@ -127,6 +132,7 @@ func deleteARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain string)
 		if err != nil {
 			return fmt.Errorf("OVH API Call Failed: DELETE %s \nError: %v",url,err)
 		}
+
 	}
 	return nil
 }
