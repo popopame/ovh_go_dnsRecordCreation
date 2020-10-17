@@ -87,6 +87,13 @@ func setVariables() (string, string, string, string, string){
 func createARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain, target string) (*ovhZoneRecord, error) {
 	url := "/domain/zone/"+ zoneName +"/record"
 
+	idsCheck, err := getRecordId(ovhClient, zoneName, fieldType, subdomain)
+	
+	if len(idsCheck) != 0 {
+		fmt.Fprintf(os.Stderr,"ERROR: The subdomain %s already exist, aborting\n", subdomain)
+		os.Exit(1)
+	}
+
 	parameters := ovhZoneRecord{
 		FieldType: fieldType,
 		Subdomain: subdomain,
@@ -95,7 +102,7 @@ func createARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain, target
 
 	record := ovhZoneRecord{}
 
-	err := ovhClient.Post(url, &parameters, &record)
+	err = ovhClient.Post(url, &parameters, &record)
 	if err != nil {
 		return nil, fmt.Errorf("OVH API Call Failed: POST %s - %v \n with param %v", url, err, parameters)
 	}
