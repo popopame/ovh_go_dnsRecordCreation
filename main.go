@@ -105,8 +105,9 @@ func createARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain, target
 	err = ovhClient.Post(url, &parameters, &record)
 	if err != nil {
 		return nil, fmt.Errorf("OVH API Call Failed: POST %s - %v \n with param %v", url, err, parameters)
-	}
-
+	} 
+	
+	_ = refreshZone(ovhClient,zoneName)
 	return &record,nil
 }
 
@@ -124,7 +125,7 @@ func getRecordId(ovhClient *ovh.Client, zoneName, fieldType, subdomain string) (
 }
 
 
-//deleteARecord takes as argument the client, zoneName, fieldType and subdomain, and susing these arg it will first querry the id using the getRecordId func and make a post request with the id
+//deleteARecord takes as argument the client, zoneName, fieldType and subdomain, and using these arg it will first querry the id using the getRecordId func and make a post request with the id
 func deleteARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain string) error {
 	
 	ids , err := getRecordId(ovhClient, zoneName, fieldType, subdomain)
@@ -141,5 +142,19 @@ func deleteARecord(ovhClient *ovh.Client, zoneName, fieldType, subdomain string)
 		}
 
 	}
+	_ = refreshZone(ovhClient,zoneName)
+
+	return nil
+}
+
+//refreshZone will apply the new modification on the DNS zone, it only take as arguments the zone Name, it need to be called after the modifications
+func refreshZone(ovhClient *ovh.Client, zoneName string) error{
+	url := "/domain/zone/"+ zoneName + "/refresh"
+
+	err := ovhClient.Post(url,nil,nil)
+	if err != nil {
+		return fmt.Errorf("OVH API Call Failed: POST %s \n Error: %v",url,err)
+	}
+
 	return nil
 }
